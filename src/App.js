@@ -1,39 +1,51 @@
-import React, { useEffect, useState } from "react";
-import Generator from "./components/Generator";
-import Profile from "./components/Profile";
-import { ROUTES } from "./utils/routes";
+import { useEffect, useState } from "react";
+import "react-toastify/dist/ReactToastify.css";
+import { PAGES } from "./utils/pages";
+import Generator from "./pages/Generator";
+import Profile from "./pages/Profile";
 import { loadData } from "./utils/localStorage";
 
 function App() {
-  const [page, setPage] = useState(ROUTES.GENERATOR);
-  const [resume, setResume] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  // State management
+  const [page, setPage] = useState(PAGES.GENERATOR);
+  const [openAIKey, setOpenAIKey] = useState();
+  const [resume, setResume] = useState();
 
+  // Load data from local storage on component mount
   useEffect(() => {
     const fetchLocalData = async () => {
-      const fetchedResume = await loadData("resume");
-      const fetchedApiKey = await loadData("apiKey");
-      setResume(fetchedResume || "");
-      setApiKey(fetchedApiKey || "");
+      const localResume = await loadData("resume");
+      const localOpenAIKey = await loadData("openAIKey");
+
+      setResume(localResume);
+      setOpenAIKey(localOpenAIKey);
     };
+
     fetchLocalData();
   }, []);
 
+  // Render components based on the current page
   switch (page) {
-    case ROUTES.GENERATOR:
-      return <Generator setPage={setPage} />;
-    case ROUTES.PROFILE:
+    case PAGES.GENERATOR:
+      return (
+        <Generator setPage={setPage} resume={resume} openAIKey={openAIKey} />
+      );
+
+    case PAGES.PROFILE:
       return (
         <Profile
           setPage={setPage}
-          resume={resume}
+          setOpenAIKey={setOpenAIKey}
           setResume={setResume}
-          apiKey={apiKey}
-          setApiKey={setApiKey}
+          resume={resume}
+          openAIKey={openAIKey}
         />
       );
+
     default:
-      return <Generator setPage={setPage} />;
+      return (
+        <Generator setPage={setPage} resume={resume} openAIKey={openAIKey} />
+      );
   }
 }
 

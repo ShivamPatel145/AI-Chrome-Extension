@@ -3,7 +3,7 @@
   "name": "LinkedIn Cover Letter Generator",
   "version": "1.0.0",
   "description": "Generate personalized cover letters for LinkedIn job applications using AI.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["activeTab", "storage", "scripting"],
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
@@ -11,7 +11,7 @@
   },
   "action": {
     "default_popup": "index.html",
-    "default_title": "Open the LinkedIn Cover Letter Generator"
+    "default_title": "Open the popup"
   },
   "host_permissions": ["https://www.linkedin.com/*"],
   "background": {
