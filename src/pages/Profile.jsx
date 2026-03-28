@@ -5,17 +5,38 @@ import { ToastContainer, toast } from "react-toastify";
 import { saveData } from "../utils/localStorage";
 
 function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
-  const handleSubmt = (e) => {
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSaving) return;
+
     const formData = new FormData(e.target);
-    const updatedResume = formData.get("resume");
-    const updatedOpenAIKey = formData.get("openAIKey");
+    const updatedResume = String(formData.get("resume") || "").trim();
+    const updatedOpenAIKey = String(formData.get("openAIKey") || "").trim();
+
+    if (!updatedOpenAIKey) {
+      toast.error("OpenAI key is required.", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
+    setIsSaving(true);
 
     try {
       setResume(updatedResume);
-      saveData("resume", updatedResume);
+      await saveData("resume", updatedResume);
 
-      saveData("openAIKey", updatedOpenAIKey);
+      await saveData("openAIKey", updatedOpenAIKey);
       setOpenAIKey(updatedOpenAIKey);
       toast.success("Saved successfully!", {
         position: "top-center",
@@ -28,8 +49,7 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
         theme: "light",
       });
     } catch (error) {
-      console.error("Error saving data.");
-      console.error(error);
+      console.error("Error saving data", error);
       toast.error("Error saving. Please try again", {
         position: "top-center",
         autoClose: 2000,
@@ -40,6 +60,8 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
         progress: undefined,
         theme: "light",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -55,7 +77,7 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
         </button>
       </div>
 
-      <form className="flex-col" onSubmit={handleSubmt}>
+      <form className="flex-col" onSubmit={handleSubmit}>
         <div className="mb-6">
           <label
             htmlFor="openAIKey"
@@ -66,7 +88,8 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
           <input
             id="openAIKey"
             name="openAIKey"
-            type="text"
+            type="password"
+            autoComplete="off"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="sk-...1234"
             defaultValue={openAIKey}
@@ -92,9 +115,10 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
         <div className="mb-6 text-center">
           <button
             type="submit"
+            disabled={isSaving}
             className="border-2 border-solid border-blue-500 text-blue-500 text-lg rounded-md px-5 py-2 hover:text-white hover:bg-blue-500"
           >
-            Save
+            {isSaving ? "Saving..." : "Save"}
           </button>
         </div>
       </form>

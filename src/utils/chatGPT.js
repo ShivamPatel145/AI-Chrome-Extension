@@ -6,15 +6,23 @@ const CHATGPT_MODEL = "gpt-3.5-turbo";
 
 // Function to send a message to the ChatGPT API and return the response
 export const postChatGPTMessage = async (message, openAIKey) => {
+  const trimmedMessage = message?.trim();
+  const trimmedOpenAIKey = openAIKey?.trim();
+
+  if (!trimmedMessage || !trimmedOpenAIKey) {
+    return null;
+  }
+
   // Set headers for the axios request
   const config = {
     headers: {
-      Authorization: `Bearer ${openAIKey}`,
+      Authorization: `Bearer ${trimmedOpenAIKey}`,
+      "Content-Type": "application/json",
     },
   };
 
   // Create the message object to send to the API
-  const userMessage = { role: "user", content: message };
+  const userMessage = { role: "user", content: trimmedMessage };
 
   // Define the data to send in the request body
   const chatGPTData = {
@@ -27,13 +35,14 @@ export const postChatGPTMessage = async (message, openAIKey) => {
     const response = await axios.post(CHATGPT_END_POINT, chatGPTData, config);
 
     // Extract the message content from the API response
-    const message = response?.data?.choices[0]?.message.content;
+    const generatedMessage = response?.data?.choices?.[0]?.message?.content;
 
     // Return the message content
-    return message;
+    return typeof generatedMessage === "string"
+      ? generatedMessage.trim()
+      : null;
   } catch (error) {
-    console.error("Error with ChatGPT API"); // Log error message
-    console.error(error);
+    console.error("Error with ChatGPT API", error);
 
     // Return null if an error occurs
     return null;

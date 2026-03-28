@@ -8,17 +8,21 @@ import { loadData } from "./utils/localStorage";
 function App() {
   // State management
   const [page, setPage] = useState(PAGES.GENERATOR);
-  const [openAIKey, setOpenAIKey] = useState();
-  const [resume, setResume] = useState();
+  const [openAIKey, setOpenAIKey] = useState("");
+  const [resume, setResume] = useState("");
 
   // Load data from local storage on component mount
   useEffect(() => {
     const fetchLocalData = async () => {
-      const localResume = await loadData("resume");
-      const localOpenAIKey = await loadData("openAIKey");
+      try {
+        const localResume = await loadData("resume");
+        const localOpenAIKey = await loadData("openAIKey");
 
-      setResume(localResume);
-      setOpenAIKey(localOpenAIKey);
+        setResume(localResume || "");
+        setOpenAIKey(localOpenAIKey || "");
+      } catch (error) {
+        console.error("Failed to load saved profile data", error);
+      }
     };
 
     fetchLocalData();
