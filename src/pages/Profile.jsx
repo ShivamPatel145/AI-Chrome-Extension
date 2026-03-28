@@ -4,7 +4,13 @@ import { PAGES } from "../utils/pages";
 import { ToastContainer, toast } from "react-toastify";
 import { saveData } from "../utils/localStorage";
 
-function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
+function Profile({
+  setPage,
+  setGeminiApiKey,
+  setResume,
+  resume,
+  geminiApiKey,
+}) {
   const [isSaving, setIsSaving] = React.useState(false);
 
   const handleSubmit = async (e) => {
@@ -14,10 +20,12 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
 
     const formData = new FormData(e.target);
     const updatedResume = String(formData.get("resume") || "").trim();
-    const updatedOpenAIKey = String(formData.get("openAIKey") || "").trim();
+    const updatedGeminiApiKey = String(
+      formData.get("geminiApiKey") || "",
+    ).trim();
 
-    if (!updatedOpenAIKey) {
-      toast.error("OpenAI key is required.", {
+    if (!updatedGeminiApiKey) {
+      toast.error("Gemini API key is required.", {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: false,
@@ -36,8 +44,10 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
       setResume(updatedResume);
       await saveData("resume", updatedResume);
 
-      await saveData("openAIKey", updatedOpenAIKey);
-      setOpenAIKey(updatedOpenAIKey);
+      await saveData("geminiApiKey", updatedGeminiApiKey);
+      // Keep legacy key in sync so older app versions still work after downgrade.
+      await saveData("openAIKey", updatedGeminiApiKey);
+      setGeminiApiKey(updatedGeminiApiKey);
       toast.success("Saved successfully!", {
         position: "top-center",
         autoClose: 2000,
@@ -80,19 +90,19 @@ function Profile({ setPage, setOpenAIKey, setResume, resume, openAIKey }) {
       <form className="flex-col" onSubmit={handleSubmit}>
         <div className="mb-6">
           <label
-            htmlFor="openAIKey"
+            htmlFor="geminiApiKey"
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            Your Open AI Key
+            Your Gemini API Key
           </label>
           <input
-            id="openAIKey"
-            name="openAIKey"
+            id="geminiApiKey"
+            name="geminiApiKey"
             type="password"
             autoComplete="off"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="sk-...1234"
-            defaultValue={openAIKey}
+            placeholder="AIza..."
+            defaultValue={geminiApiKey}
             required
           />
         </div>

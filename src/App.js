@@ -8,7 +8,7 @@ import { loadData } from "./utils/localStorage";
 function App() {
   // State management
   const [page, setPage] = useState(PAGES.GENERATOR);
-  const [openAIKey, setOpenAIKey] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState("");
   const [resume, setResume] = useState("");
 
   // Load data from local storage on component mount
@@ -16,10 +16,11 @@ function App() {
     const fetchLocalData = async () => {
       try {
         const localResume = await loadData("resume");
-        const localOpenAIKey = await loadData("openAIKey");
+        const localGeminiApiKey = await loadData("geminiApiKey");
+        const legacyOpenAIKey = await loadData("openAIKey");
 
         setResume(localResume || "");
-        setOpenAIKey(localOpenAIKey || "");
+        setGeminiApiKey(localGeminiApiKey || legacyOpenAIKey || "");
       } catch (error) {
         console.error("Failed to load saved profile data", error);
       }
@@ -32,23 +33,31 @@ function App() {
   switch (page) {
     case PAGES.GENERATOR:
       return (
-        <Generator setPage={setPage} resume={resume} openAIKey={openAIKey} />
+        <Generator
+          setPage={setPage}
+          resume={resume}
+          geminiApiKey={geminiApiKey}
+        />
       );
 
     case PAGES.PROFILE:
       return (
         <Profile
           setPage={setPage}
-          setOpenAIKey={setOpenAIKey}
+          setGeminiApiKey={setGeminiApiKey}
           setResume={setResume}
           resume={resume}
-          openAIKey={openAIKey}
+          geminiApiKey={geminiApiKey}
         />
       );
 
     default:
       return (
-        <Generator setPage={setPage} resume={resume} openAIKey={openAIKey} />
+        <Generator
+          setPage={setPage}
+          resume={resume}
+          geminiApiKey={geminiApiKey}
+        />
       );
   }
 }

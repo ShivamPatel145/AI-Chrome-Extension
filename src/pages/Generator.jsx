@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { VscGear } from "react-icons/vsc";
 import { PAGES } from "../utils/pages";
 import { loadData } from "../utils/localStorage";
-import { postChatGPTMessage } from "../utils/chatgpt";
+import { postGeminiMessage } from "../utils/chatgpt";
 
-function Generator({ setPage, resume, openAIKey }) {
+function Generator({ setPage, resume, geminiApiKey }) {
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,12 +36,12 @@ function Generator({ setPage, resume, openAIKey }) {
     if (isLoading) return;
 
     const trimmedResume = resume?.trim();
-    const trimmedOpenAIKey = openAIKey?.trim();
+    const trimmedGeminiApiKey = geminiApiKey?.trim();
     const trimmedJobDescription = jobDescription?.trim();
 
-    if (!trimmedOpenAIKey) {
+    if (!trimmedGeminiApiKey) {
       setErrorMessage(
-        "Please add your OpenAI key in Profile before generating.",
+        "Please add your Gemini API key in Profile before generating.",
       );
       return;
     }
@@ -62,25 +62,21 @@ function Generator({ setPage, resume, openAIKey }) {
     setIsLoading(true);
 
     try {
-      // Create message to send to chatGPT API
+      // Create message to send to Gemini API
       const message = `Generate a concise, professional cover letter based on the following resume and job description.\n\nRESUME:\n${trimmedResume}\n\nJob Description:\n${trimmedJobDescription}`;
-      // Send message to chatGPT API and wait for response
-      const chatGPTResponse = await postChatGPTMessage(message, openAIKey);
-
-      if (!chatGPTResponse) {
-        setErrorMessage(
-          "Failed to generate cover letter. Check your API key and try again.",
-        );
-        return;
-      }
+      // Send message to Gemini API and wait for response
+      const generatedCoverLetter = await postGeminiMessage(
+        message,
+        trimmedGeminiApiKey,
+      );
 
       // Update state with generated cover letter
-      setCoverLetter(chatGPTResponse);
+      setCoverLetter(generatedCoverLetter);
     } catch (error) {
       console.error("Error while generating cover letter", error);
-      setErrorMessage(
-        "Something went wrong while generating. Please try again.",
-      );
+      const fallbackMessage =
+        "Something went wrong while generating. Please try again.";
+      setErrorMessage(error?.message || fallbackMessage);
     } finally {
       // Set loading state to false once the process is complete (whether it was successful or not)
       setIsLoading(false);
