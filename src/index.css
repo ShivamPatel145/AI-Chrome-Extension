@@ -2,32 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+/* ── Extension popup shell ───────────────────────── */
 body {
     width: 420px;
     height: 560px;
     overflow: hidden;
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f3f2ef;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #f4f7fb;
-    color: #0f172a;
 }
 
 #root {
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    width: 100%;
 }
 
+/* ── Scrollbar ───────────────────────────────────── */
 ::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -35,61 +31,15 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: #c7c4bf;
     border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: #a8a5a0;
 }
 
-button,
-input,
-textarea {
-    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-        border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-        color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-textarea:focus,
-input:focus {
-    outline: none;
-}
-
-/* Subtle fade-in animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(4px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-
-    100% {
-        background-position: 200% 0;
-    }
-}
-
-.shimmer {
-    background: linear-gradient(90deg,
-            #f3f4f6 25%,
-            #e5e7eb 50%,
-            #f3f4f6 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+/* ── Selection ───────────────────────────────────── */
+::selection {
+    background: #0a66c233;
 }

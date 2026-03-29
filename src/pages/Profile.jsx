@@ -1,22 +1,184 @@
 import React, { useState } from "react";
-import {
-  MdArrowBack,
-  MdInfoOutline,
-  MdLockOutline,
-  MdOpenInNew,
-  MdSave,
-  MdVisibility,
-  MdVisibilityOff,
-} from "react-icons/md";
 import { PAGES, TOAST_CONFIG } from "../utils/constants";
 import { ToastContainer, toast } from "react-toastify";
 import { saveData } from "../utils/localStorage";
-import { POPUP_THEME } from "../utils/uiTheme";
 
-const t = POPUP_THEME;
-const c = t.colors;
+// ── Icons ─────────────────────────────────────────────────────────────────────
 
-function Profile({
+function ArrowLeftIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M15 19l-7-7 7-7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function EyeOnIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <line
+        x1="1"
+        y1="1"
+        x2="23"
+        y2="23"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function KeyIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function FileTextIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0 mt-px"
+    >
+      <path
+        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+        stroke="#0A66C2"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 12l2 2 4-4"
+        stroke="#0A66C2"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SaveIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 21v-8H7v8M7 3v5h8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ── Reusable card ─────────────────────────────────────────────────────────────
+
+function Card({ icon, title, subtitle, action, children }) {
+  return (
+    <div className="bg-white border border-warm-200/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between px-4 pt-4 pb-3">
+        <div className="flex items-center gap-3">
+          <div className="text-linkedin-500 flex-shrink-0">{icon}</div>
+          <div>
+            <p className="text-[13.5px] font-semibold text-linkedin-900 leading-tight">
+              {title}
+            </p>
+            <p className="text-[11.5px] text-gray-500 mt-0.5">{subtitle}</p>
+          </div>
+        </div>
+        {action}
+      </div>
+      <div className="px-4 pb-4">{children}</div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export default function Profile({
   setPage,
   setGeminiApiKey,
   setResume,
@@ -25,34 +187,34 @@ function Profile({
 }) {
   const [isSaving, setIsSaving] = useState(false);
   const [showKey, setShowKey] = useState(false);
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     geminiApiKey: geminiApiKey || "",
     resume: resume || "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (isSaving) return;
 
-    const updatedResume = String(formData.resume || "").trim();
-    const updatedKey = String(formData.geminiApiKey || "").trim();
+    const key = form.geminiApiKey.trim();
+    const res = form.resume.trim();
 
-    if (!updatedKey) {
+    if (!key) {
       toast.error("API key is required.", TOAST_CONFIG);
       return;
     }
 
     setIsSaving(true);
     try {
-      setResume(updatedResume);
-      await saveData("resume", updatedResume);
-      await saveData("geminiApiKey", updatedKey);
-      setGeminiApiKey(updatedKey);
+      setResume(res);
+      await saveData("resume", res);
+      await saveData("geminiApiKey", key);
+      setGeminiApiKey(key);
       toast.success("Settings saved successfully.", TOAST_CONFIG);
     } catch {
       toast.error("Save failed. Try again.", TOAST_CONFIG);
@@ -62,154 +224,164 @@ function Profile({
   };
 
   const hasChanges =
-    formData.geminiApiKey !== (geminiApiKey || "") ||
-    formData.resume !== (resume || "");
-
-  const charCount = formData.resume.length;
+    form.geminiApiKey !== (geminiApiKey || "") ||
+    form.resume !== (resume || "");
+  const charCount = form.resume.length;
   const charPct = Math.min((charCount / 5000) * 100, 100);
-  const charOverLimit = charCount > 4500;
+  const charWarn = charCount > 4500;
+  const badKey =
+    form.geminiApiKey && !form.geminiApiKey.trim().startsWith("AIza");
 
   return (
-    <div style={s.root}>
-      <header style={s.header}>
-        <div style={s.headerLeft}>
+    <div className="flex flex-col w-[420px] h-[580px] bg-warm-100 font-sans text-linkedin-900 overflow-hidden">
+      {/* ─── Header ─────────────────────────────────────────── */}
+      <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-warm-200/80 shrink-0 shadow-xs">
+        <div className="flex items-center gap-3">
           <button
-            type="button"
-            style={s.backBtn}
             onClick={() => setPage(PAGES.GENERATOR)}
+            className="w-9 h-9 rounded-lg border border-warm-200/80 bg-warm-50/80 text-gray-600 flex items-center justify-center hover:bg-warm-100 hover:text-linkedin-500 hover:border-linkedin-200 transition-all"
             title="Back"
-            aria-label="Go back"
           >
-            <MdArrowBack size={18} />
+            <ArrowLeftIcon />
           </button>
           <div>
-            <p style={s.headerTitle}>Settings</p>
-            <p style={s.headerSub}>Manage Gemini and resume profile</p>
+            <p className="text-[15px] font-bold text-linkedin-900 tracking-tight leading-tight">
+              Settings
+            </p>
+            <p className="text-[12px] text-gray-500 mt-1 leading-none">
+              API key & resume profile
+            </p>
           </div>
         </div>
-        {hasChanges && <span style={s.unsavedBadge}>Unsaved changes</span>}
+        {hasChanges && (
+          <span className="text-[10.5px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 animate-fade-in">
+            ● Unsaved changes
+          </span>
+        )}
       </header>
 
-      <div style={s.scrollArea}>
-        <form style={s.form} onSubmit={handleSubmit}>
-          <section style={s.panel}>
-            <div style={s.sectionHead}>
-              <div>
-                <p style={s.sectionLabel}>Gemini API Key</p>
-                <p style={s.sectionDesc}>
-                  Used for generating cover letters with Google AI.
-                </p>
-              </div>
+      {/* ─── Scrollable form ────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto">
+        <form className="flex flex-col gap-3 p-4" onSubmit={handleSave}>
+          {/* API Key Card */}
+          <Card
+            icon={<KeyIcon />}
+            title="Gemini API Key"
+            subtitle="Required to generate cover letters"
+            action={
               <a
                 href="https://aistudio.google.com/apikey"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={s.externalLink}
+                className="flex items-center gap-1 text-[11px] font-semibold text-linkedin-500 hover:text-linkedin-600 whitespace-nowrap mt-0.5 transition-colors"
               >
-                Get key
-                <MdOpenInNew size={13} style={{ marginLeft: 3 }} />
+                Get key <ExternalLinkIcon />
               </a>
-            </div>
-
-            <div style={s.inputWrap}>
+            }
+          >
+            <div className="relative mt-1">
               <input
                 id="geminiApiKey"
                 name="geminiApiKey"
                 type={showKey ? "text" : "password"}
                 autoComplete="off"
-                style={s.input}
-                placeholder="AIzaSy..."
-                value={formData.geminiApiKey}
+                placeholder="AIzaSy…"
+                value={form.geminiApiKey}
                 onChange={handleChange}
                 required
+                className="w-full pl-4 pr-11 py-2.5 bg-warm-50/80 border border-warm-200/80 rounded-lg text-[13px] text-linkedin-900 placeholder-gray-400 focus:outline-none focus:border-linkedin-500 focus:ring-2 focus:ring-linkedin-500/15 transition-all"
               />
               <button
                 type="button"
-                style={s.visBtn}
-                onClick={() => setShowKey(!showKey)}
-                title={showKey ? "Hide key" : "Show key"}
-                aria-label={showKey ? "Hide key" : "Show key"}
+                onClick={() => setShowKey((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-md text-gray-400 hover:text-linkedin-500 hover:bg-linkedin-50 transition-colors"
               >
-                {showKey ? (
-                  <MdVisibilityOff size={16} />
-                ) : (
-                  <MdVisibility size={16} />
-                )}
+                {showKey ? <EyeOffIcon /> : <EyeOnIcon />}
               </button>
             </div>
 
-            {formData.geminiApiKey &&
-              !formData.geminiApiKey.trim().startsWith("AIza") && (
-                <div style={s.hintWarn}>
-                  <MdInfoOutline size={14} style={{ flexShrink: 0 }} />
-                  <p style={s.hintWarnText}>
-                    Gemini API keys typically start with "AIza".
-                  </p>
-                </div>
-              )}
-          </section>
-
-          <section style={s.panel}>
-            <div style={s.sectionHead}>
-              <div>
-                <p style={s.sectionLabel}>Resume</p>
-                <p style={s.sectionDesc}>
-                  Personalizes your generated cover letters.
-                </p>
+            {badKey && (
+              <div className="mt-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 leading-relaxed flex items-start gap-1.5">
+                <span className="mt-0.5">⚠️</span>
+                <span>
+                  Gemini keys typically start with{" "}
+                  <code className="bg-amber-100 px-1 py-0.5 rounded text-[10px] font-mono">
+                    AIza
+                  </code>{" "}
+                  — double-check this value.
+                </span>
               </div>
-              <span style={charOverLimit ? s.charCountWarn : s.charCount}>
-                {charCount.toLocaleString()} chars
-              </span>
-            </div>
+            )}
+          </Card>
 
-            <div style={s.progressTrack}>
+          {/* Resume Card */}
+          <Card
+            icon={<FileTextIcon />}
+            title="Resume"
+            subtitle="Personalizes your generated letters"
+            action={
+              <span
+                className={`text-[11px] font-medium whitespace-nowrap mt-1 tabular-nums ${
+                  charWarn ? "text-red-500" : "text-gray-400"
+                }`}
+              >
+                {charCount.toLocaleString()} / 5,000
+              </span>
+            }
+          >
+            {/* Progress bar */}
+            <div className="h-1 bg-warm-200 rounded-full overflow-hidden mt-1 mb-2">
               <div
-                style={{
-                  ...s.progressFill,
-                  width: `${charPct}%`,
-                  background: charOverLimit
-                    ? "linear-gradient(90deg, #f59e0b, #ea580c)"
-                    : `linear-gradient(90deg, ${c.accent}, ${c.accentDark})`,
-                }}
+                className={`h-full rounded-full transition-all duration-500 ease-out ${
+                  charWarn
+                    ? "bg-gradient-to-r from-amber-400 to-red-500"
+                    : "bg-gradient-to-r from-linkedin-400 to-linkedin-500"
+                }`}
+                style={{ width: `${charPct}%` }}
               />
             </div>
 
             <textarea
               id="resume"
               name="resume"
-              value={formData.resume}
+              rows={7}
+              value={form.resume}
               onChange={handleChange}
-              rows={9}
-              style={s.textarea}
-              placeholder="Paste your full resume here - the more detail, the more tailored your cover letters will be."
+              placeholder="Paste your full resume here — the more detail, the better your cover letters will be."
+              className="w-full px-4 py-2.5 bg-warm-50/80 border border-warm-200/80 rounded-lg text-[13px] text-gray-700 placeholder-gray-400 leading-relaxed resize-y focus:outline-none focus:border-linkedin-500 focus:ring-2 focus:ring-linkedin-500/15 transition-all min-h-[140px]"
             />
-          </section>
+          </Card>
 
-          <div style={s.privacyCard}>
-            <MdLockOutline size={14} style={s.privacyIcon} />
-            <p style={s.privacyText}>
-              All data is stored locally in your browser. Nothing is sent to any
-              server except the Gemini API when you generate.
+          {/* Privacy note */}
+          {/* <div className="flex items-start gap-3 px-4 py-3.5 bg-linkedin-50/80 border border-linkedin-100/60 rounded-xl">
+            <ShieldIcon />
+            <p className="text-[11.5px] text-gray-600 leading-relaxed">
+              All data is stored{" "}
+              <span className="font-semibold text-linkedin-600">locally</span>{" "}
+              in your browser. Nothing is sent anywhere except Gemini when you
+              generate.
             </p>
-          </div>
+          </div> */}
 
+          {/* Save button */}
           <button
             type="submit"
             disabled={isSaving || !hasChanges}
-            style={
-              isSaving || !hasChanges
-                ? { ...s.saveBtn, ...s.saveBtnOff }
-                : s.saveBtn
-            }
+            className={`w-full py-3 rounded-full text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-1
+              ${
+                isSaving || !hasChanges
+                  ? "bg-warm-300 text-gray-400 cursor-not-allowed"
+                  : "bg-linkedin-500 text-white shadow-md shadow-linkedin-500/25 hover:bg-linkedin-600 active:scale-[0.98]"
+              }`}
           >
             {isSaving ? (
               <>
-                <span style={s.spin} />
-                Saving...
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Saving…
               </>
             ) : (
               <>
-                <MdSave size={15} style={{ marginRight: 7 }} />
+                <SaveIcon />
                 Save Settings
               </>
             )}
@@ -218,288 +390,6 @@ function Profile({
       </div>
 
       <ToastContainer />
-
-      <style>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        #geminiApiKey::placeholder,
-        #resume::placeholder {
-          color: #94a3b8;
-        }
-        #geminiApiKey:focus, #resume:focus {
-          outline: none;
-          border-color: ${c.accentBorder};
-          box-shadow: 0 0 0 3px rgba(20, 99, 255, 0.12);
-        }
-        ::-webkit-scrollbar {
-          width: 5px;
-        }
-        ::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 }
-
-const s = {
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    width: t.width,
-    height: t.height,
-    background:
-      "radial-gradient(circle at top right, #f8fbff 0%, #f4f7fb 38%, #edf2f9 100%)",
-    fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-    color: c.textPrimary,
-    overflow: "hidden",
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "14px 16px 12px",
-    background: "rgba(255, 255, 255, 0.74)",
-    borderBottom: `1px solid ${c.border}`,
-    flexShrink: 0,
-    backdropFilter: "blur(4px)",
-  },
-  headerLeft: { display: "flex", alignItems: "center", gap: 10 },
-  backBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    border: `1px solid ${c.border}`,
-    background: c.surface,
-    color: c.textSecondary,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    boxShadow: "0 2px 6px rgba(15, 23, 42, 0.06)",
-  },
-  headerTitle: {
-    margin: 0,
-    fontSize: 13.6,
-    fontWeight: 600,
-    color: c.textPrimary,
-    letterSpacing: "-0.01em",
-    lineHeight: 1,
-  },
-  headerSub: {
-    margin: "4px 0 0",
-    fontSize: 11,
-    color: c.textMuted,
-    lineHeight: 1,
-  },
-  unsavedBadge: {
-    fontSize: 10.8,
-    fontWeight: 600,
-    color: c.warning,
-    background: c.warningSoft,
-    border: `1px solid ${c.warningBorder}`,
-    borderRadius: 20,
-    padding: "3px 9px",
-  },
-  scrollArea: {
-    flex: 1,
-    overflowY: "auto",
-    scrollbarWidth: "thin",
-    scrollbarColor: "#cbd5e1 transparent",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    padding: "14px 14px 8px",
-    gap: 10,
-  },
-  panel: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    background: c.surface,
-    border: `1px solid ${c.border}`,
-    borderRadius: t.radius,
-    padding: "12px",
-    boxShadow: t.shadows.panel,
-  },
-  sectionHead: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  sectionLabel: {
-    margin: 0,
-    fontSize: 13.2,
-    fontWeight: 600,
-    color: c.textPrimary,
-    letterSpacing: "-0.01em",
-  },
-  sectionDesc: {
-    margin: "2px 0 0",
-    fontSize: 11.5,
-    color: c.textMuted,
-    lineHeight: 1.4,
-  },
-  externalLink: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: c.accent,
-    textDecoration: "none",
-    whiteSpace: "nowrap",
-    display: "flex",
-    alignItems: "center",
-    marginTop: 2,
-  },
-  inputWrap: { position: "relative" },
-  input: {
-    width: "100%",
-    padding: "10px 40px 10px 12px",
-    background: c.surface,
-    border: `1px solid ${c.border}`,
-    borderRadius: 10,
-    fontSize: 13,
-    color: c.textPrimary,
-    fontFamily: "inherit",
-    transition: "border-color 0.15s, box-shadow 0.15s",
-    boxSizing: "border-box",
-  },
-  visBtn: {
-    position: "absolute",
-    right: 10,
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: c.surfaceMuted,
-    border: `1px solid ${c.border}`,
-    color: c.textMuted,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 25,
-    height: 25,
-    padding: 0,
-    borderRadius: 7,
-  },
-  hintWarn: {
-    margin: 0,
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 6,
-    fontSize: 11,
-    color: c.warning,
-    background: c.warningSoft,
-    border: `1px solid ${c.warningBorder}`,
-    borderRadius: 8,
-    padding: "6px 8px",
-  },
-  hintWarnText: {
-    margin: 0,
-    lineHeight: 1.45,
-  },
-  charCount: {
-    fontSize: 11.5,
-    color: c.textMuted,
-    whiteSpace: "nowrap",
-    marginTop: 2,
-  },
-  charCountWarn: {
-    fontSize: 11.5,
-    color: c.warning,
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-    marginTop: 2,
-  },
-  progressTrack: {
-    height: 4,
-    background: "#edf2f7",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginTop: -2,
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 10,
-    transition: "width 0.3s ease",
-  },
-  textarea: {
-    width: "100%",
-    minHeight: 176,
-    padding: "10px 12px",
-    background: c.surface,
-    border: `1px solid ${c.border}`,
-    borderRadius: 10,
-    fontSize: 12.5,
-    color: c.textSecondary,
-    fontFamily: "inherit",
-    lineHeight: 1.65,
-    resize: "vertical",
-    transition: "border-color 0.15s, box-shadow 0.15s",
-    boxSizing: "border-box",
-  },
-  privacyCard: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 8,
-    padding: "10px 11px",
-    background: c.surfaceMuted,
-    border: `1px solid ${c.border}`,
-    borderRadius: 11,
-    marginTop: 2,
-  },
-  privacyIcon: {
-    color: c.textMuted,
-    flexShrink: 0,
-    marginTop: 1,
-  },
-  privacyText: {
-    margin: 0,
-    fontSize: 11,
-    color: c.textMuted,
-    lineHeight: 1.55,
-  },
-  saveBtn: {
-    marginTop: 2,
-    marginBottom: 2,
-    width: "100%",
-    padding: "12px 14px",
-    borderRadius: 11,
-    border: "none",
-    background: `linear-gradient(145deg, ${c.accent} 0%, ${c.accentDark} 100%)`,
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    letterSpacing: "-0.01em",
-    boxShadow: t.shadows.button,
-  },
-  saveBtnOff: {
-    background: "#e9eef5",
-    color: c.textMuted,
-    cursor: "not-allowed",
-    boxShadow: "none",
-  },
-  spin: {
-    display: "inline-block",
-    width: 13,
-    height: 13,
-    border: "2px solid rgba(255, 255, 255, 0.3)",
-    borderTopColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: "50%",
-    animation: "spin 0.75s linear infinite",
-  },
-};
-
-export default Profile;
