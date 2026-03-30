@@ -7,7 +7,7 @@ import { postGeminiMessage } from "../utils/geminiApi";
 
 function LinkedInLogo() {
   return (
-    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-linkedin-50 to-linkedin-100 border border-linkedin-200/60 p-1 flex items-center justify-center shrink-0 shadow-sm">
+    <div className="w-11 h-11 rounded-xl border border-linkedin-200/60 p-1 flex items-center justify-center shrink-0 shadow-sm">
       <svg
         viewBox="0 0 512 512"
         fill="none"
@@ -212,13 +212,13 @@ const STEPS = [
 function EmptyState() {
   return (
     <div className="flex h-full flex-col items-center justify-center px-6 py-8 text-center">
-      <div className="w-14 h-14 rounded-2xl bg-linkedin-50 border border-linkedin-100 flex items-center justify-center mb-4">
+      <div className="w-14 h-14 rounded-2xl bg-linkedin-50 border border-linkedin-100 flex items-center justify-center mb-2 py-3">
         <BriefcaseIcon className="text-linkedin-500" />
       </div>
       <p className="text-[15px] font-semibold text-linkedin-900 tracking-tight mb-1.5">
         Ready to generate
       </p>
-      <p className="text-[12px] text-gray-500 leading-relaxed max-w-[250px] mb-7">
+      <p className="text-[12px] text-gray-500 leading-relaxed max-w-[250px] mb-4">
         Open a LinkedIn job posting, then come back and click Generate below.
       </p>
       <div className="flex flex-col gap-3.5 w-full max-w-[275px]">
@@ -246,12 +246,14 @@ export default function CoverLetterGenerator({
   setPage,
   resume,
   geminiApiKey,
+  letterTone,
 }) {
   const [jobDescription, setJobDescription] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [letterLength, setLetterLength] = useState("medium");
 
   useEffect(() => {
     let alive = true;
@@ -287,9 +289,120 @@ export default function CoverLetterGenerator({
     setCopied(false);
 
     try {
+      // Detailed tone instructions
+      const toneInstructions = {
+        professional: {
+          guide: "Formal, business-professional tone. Use structured language.",
+          content:
+            "- Demonstrate alignment with company mission\n" +
+            "- Highlight relevant experience and accomplishments\n" +
+            "- Show understanding of the role's responsibilities\n" +
+            "- Express genuine interest in contributing to the organization",
+        },
+        enthusiastic: {
+          guide:
+            "Energetic, confident, and passionate tone. Show genuine excitement.",
+          content:
+            "- Lead with WHY this role/company excites you specifically\n" +
+            "- Show enthusiasm for the impact you'll make\n" +
+            "- Demonstrate passion for the mission/work\n" +
+            "- End with eagerness to discuss the opportunity",
+        },
+        technical: {
+          guide:
+            "Technical-focused tone. Emphasize tools, technologies, and measurable results.",
+          content:
+            "- List specific technologies/frameworks/tools relevant to the job\n" +
+            "- Highlight concrete achievements with metrics (30% improvement, scaled from X to Y, etc.)\n" +
+            "- Connect technical skills directly to job requirements\n" +
+            "- Mention production experience, system design, or architecture decisions",
+        },
+        strategic: {
+          guide:
+            "Leadership-focused tone. Emphasize strategic thinking and business impact.",
+          content:
+            "- Focus on business outcomes and ROI, not just tasks\n" +
+            "- Highlight leadership, initiative-taking, and strategic decisions\n" +
+            "- Show how you've driven change or improvement\n" +
+            "- Demonstrate understanding of broader company/industry challenges",
+        },
+      };
+
+      // Detailed length specifications
+      const lengthSpecs = {
+        short: {
+          format:
+            "EXACTLY 1-2 SHORT PARAGRAPHS (90-130 words total). Maximum 2 paragraphs.",
+          structure:
+            "Paragraph 1: Opening hook + 1 specific match to job\n" +
+            "Paragraph 2: 1 concrete achievement + brief call-to-action\n" +
+            "NO fluff, NO generic closing",
+          rules:
+            "- Each sentence must add value\n" +
+            "- Use short, punchy sentences (under 15 words)\n" +
+            "- Replace adjectives with metrics/proof\n" +
+            "- NO 'I am excited to' or 'I believe' filler phrases",
+        },
+        medium: {
+          format: "EXACTLY 2-3 PARAGRAPHS (180-240 words total).",
+          structure:
+            "Paragraph 1: Opening hook (why this role/company?)\n" +
+            "Paragraph 2: 2-3 specific achievements aligned to job\n" +
+            "Paragraph 3: Closing statement + ask to discuss",
+          rules:
+            "- Lead with strongest qualification\n" +
+            "- Use concrete examples and numbers\n" +
+            "- Connect each achievement back to job needs\n" +
+            "- Avoid repeated information from resume",
+        },
+        long: {
+          format: "EXACTLY 3-4 PARAGRAPHS (300-380 words total).",
+          structure:
+            "Paragraph 1: Strong opening hook + role context\n" +
+            "Paragraph 2: Deep dive into 1 major achievement/project\n" +
+            "Paragraph 3: 1-2 additional relevant achievements\n" +
+            "Paragraph 4: Closing statement + strong call-to-action",
+          rules:
+            "- Tell a compelling narrative across paragraphs\n" +
+            "- Include project context, challenges, and results\n" +
+            "- Show progression and growth\n" +
+            "- End with enthusiasm and next steps",
+        },
+      };
+
+      const selectedTone = letterTone || "professional";
+      const selectedLength = letterLength || "medium";
+      const toneInfo =
+        toneInstructions[selectedTone] || toneInstructions.professional;
+      const lengthInfo = lengthSpecs[selectedLength] || lengthSpecs.medium;
+
       const prompt =
-        `Generate a concise, professional cover letter based on the following resume and job description. ` +
-        `Make it personalized, compelling, and ready to use.\n\nRESUME:\n${res}\n\nJOB DESCRIPTION:\n${jd}`;
+        `You are an expert cover letter writer. Your task is to write a cover letter with these EXACT specifications:\n\n` +
+        `=== TONE STYLE ===\n` +
+        `${toneInfo.guide}\n\n` +
+        `What to include (${selectedTone}):\n` +
+        `${toneInfo.content}\n\n` +
+        `=== LENGTH & FORMAT ===\n` +
+        `${lengthInfo.format}\n\n` +
+        `Structure:\n` +
+        `${lengthInfo.structure}\n\n` +
+        `Rules to follow:\n` +
+        `${lengthInfo.rules}\n\n` +
+        `=== CONTENT RULES ===\n` +
+        `- Write the cover letter ONLY (no subject line, salutation, signature, or closing)\n` +
+        `- Make it immediately ready to use - no "Dear Hiring Manager" or "Sincerely"\n` +
+        `- Use SPECIFIC details from the resume and job description\n` +
+        `- Avoid generic phrases - every sentence must be specific to THIS candidate and THIS job\n` +
+        `- If metrics exist, USE THEM. e.g., "increased X by 40%" not "improved X"\n` +
+        `- Match language from the job description when relevant\n\n` +
+        `=== INPUT DATA ===\n` +
+        `RESUME:\n${res}\n\n` +
+        `JOB DESCRIPTION:\n${jd}\n\n` +
+        `=== FINAL CHECK ===\n` +
+        `Word count should be ${selectedLength === "short" ? "90-130" : selectedLength === "medium" ? "180-240" : "300-380"} words.\n` +
+        `Paragraph count should be ${selectedLength === "short" ? "1-2" : selectedLength === "medium" ? "2-3" : "3-4"}.\n\n` +
+        `Write the cover letter now:`;
+
       setCoverLetter(await postGeminiMessage(prompt, key));
     } catch (err) {
       setErrorMessage(err?.message || "Something went wrong. Please retry.");
@@ -332,21 +445,21 @@ export default function CoverLetterGenerator({
   return (
     <div className="flex flex-col w-[420px] h-[560px] bg-warm-100 font-sans text-linkedin-900 overflow-hidden">
       {/* ─── Header ───────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-warm-200/80 shrink-0 shadow-xs">
-        <div className="flex items-center gap-3.5">
+      <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-warm-200/80 shrink-0 shadow-xs">
+        <div className="flex items-center gap-3">
           <LinkedInLogo />
           <div>
-            <p className="text-[15px] font-bold text-linkedin-900 tracking-tight leading-tight">
+            <p className="text-[14px] font-bold text-linkedin-900 tracking-tight leading-tight">
               CoverCraft
             </p>
-            <p className="text-[12px] text-gray-500 mt-1 leading-none">
-              LinkedIn → tailored cover letter
+            <p className="text-[11px] text-gray-500 mt-1 leading-none">
+              LinkedIn → tailored letter
             </p>
           </div>
         </div>
         <button
           onClick={() => setPage(PAGES.PROFILE)}
-          className="w-9 h-9 rounded-lg border border-warm-300/80 bg-warm-50 text-gray-500 flex items-center justify-center hover:bg-linkedin-50 hover:text-linkedin-500 hover:border-linkedin-200 transition-colors"
+          className="w-8 h-8 rounded-lg border border-warm-300/80 bg-warm-50 text-gray-500 flex items-center justify-center hover:bg-linkedin-50 hover:text-linkedin-500 hover:border-linkedin-200 transition-colors"
           title="Settings"
         >
           <SettingsIcon />
@@ -355,12 +468,12 @@ export default function CoverLetterGenerator({
 
       {/* ─── Setup nudge ──────────────────────────────────── */}
       {missingSetup && !errorMessage && (
-        <div className="mx-4 mt-2 flex items-center gap-2.5 px-3.5 py-2.5 bg-linkedin-50 border border-linkedin-100 rounded-xl text-[11.5px] text-linkedin-600 shrink-0 animate-fade-in">
+        <div className="mx-3 mt-1.5 flex items-center gap-2.5 px-3 py-2 bg-linkedin-50 border border-linkedin-100 rounded-lg text-[10.5px] text-linkedin-600 shrink-0 animate-fade-in">
           <AlertCircleIcon />
           <span className="flex-1 font-medium">{nudgeText}</span>
           <button
             onClick={() => setPage(PAGES.PROFILE)}
-            className="text-[11px] font-bold text-linkedin-500 whitespace-nowrap hover:text-linkedin-700 transition-colors"
+            className="text-[10px] font-bold text-linkedin-500 whitespace-nowrap hover:text-linkedin-700 transition-colors"
           >
             Setup →
           </button>
@@ -369,33 +482,62 @@ export default function CoverLetterGenerator({
 
       {/* ─── Error banner ─────────────────────────────────── */}
       {errorMessage && (
-        <div className="mx-4 mt-2 flex items-center gap-2.5 px-3.5 py-2.5 bg-red-50 border border-red-200 rounded-xl text-[11.5px] text-red-600 shrink-0 animate-fade-in">
+        <div className="mx-3 mt-1.5 flex items-center gap-2.5 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-[10.5px] text-red-600 shrink-0 animate-fade-in">
           <span className="flex-1 font-medium">⚠ {errorMessage}</span>
           <button
             onClick={() => setErrorMessage("")}
-            className="text-red-300 hover:text-red-500 font-bold text-sm transition-colors px-1"
+            className="text-red-300 hover:text-red-500 font-bold transition-colors"
           >
             ✕
           </button>
         </div>
       )}
 
+      {/* ─── Letter Length Selector ───────────────────────── */}
+      <div className="px-3 py-2 shrink-0 bg-warm-100 border-b border-warm-200/50">
+        <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.15em] mb-1.5 px-1">
+          Letter Length
+        </p>
+        <div className="flex gap-2">
+          {[
+            { value: "short", label: "Short", hint: "2-3 para" },
+            { value: "medium", label: "Medium", hint: "3-4 para" },
+            { value: "long", label: "Long", hint: "4-5 para" },
+          ].map(({ value, label, hint }) => (
+            <button
+              key={value}
+              onClick={() => setLetterLength(value)}
+              disabled={isLoading}
+              className={`flex-1 p-3 rounded-lg text-[10px] font-semibold transition-all
+                ${
+                  letterLength === value
+                    ? "bg-linkedin-500 text-white border border-linkedin-600 shadow-sm"
+                    : "bg-white text-gray-600 border border-warm-300/80 hover:border-linkedin-200 hover:bg-linkedin-50"
+                } disabled:opacity-60 disabled:cursor-not-allowed`}
+            >
+              <div className="leading-tight">{label}</div>
+              <div className="text-[8px] opacity-70">{hint}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ─── Output panel ─────────────────────────────────── */}
-      <div className="flex flex-col flex-1 mx-4 mt-2 mb-3 bg-white border border-warm-300/60 rounded-2xl shadow-sm overflow-hidden min-h-0">
+      <div className="flex flex-col flex-1 mx-3 my-1.5 bg-white border border-warm-300/60 rounded-xl shadow-sm overflow-hidden min-h-0">
         {/* Panel status bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-warm-200 bg-warm-50/80 shrink-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-warm-200 bg-warm-50/80 shrink-0">
+          <div className="flex items-center gap-1.5">
             <span
-              className={`w-2 h-2 rounded-full transition-colors duration-300 ${statusDot}`}
+              className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${statusDot}`}
             />
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.18em]">
+            <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.15em]">
               {statusLabel}
             </span>
           </div>
           {coverLetter && (
             <button
               onClick={copyToClipboard}
-              className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all
+              className={`flex items-center gap-1 text-[9.5px] font-semibold px-2.5 py-1 rounded-lg border transition-all
                 ${
                   copied
                     ? "text-green-600 bg-green-50 border-green-200"
@@ -420,7 +562,7 @@ export default function CoverLetterGenerator({
           {isLoading ? (
             <Skeleton />
           ) : coverLetter ? (
-            <p className="px-4 py-4 text-[12.5px] text-gray-600 leading-[1.85] whitespace-pre-wrap animate-fade-in">
+            <p className="px-3 py-3 text-[12px] text-gray-600 leading-[1.75] whitespace-pre-wrap animate-fade-in">
               {coverLetter}
             </p>
           ) : (
@@ -430,25 +572,25 @@ export default function CoverLetterGenerator({
       </div>
 
       {/* ─── Generate button ──────────────────────────────── */}
-      <div className="px-4 pb-4 shrink-0">
+      <div className="px-3 pb-3 shrink-0">
         <button
           onClick={generate}
           disabled={isLoading}
-          className={`w-full py-3.5 rounded-full text-[13px] font-semibold flex items-center justify-center gap-2 transition-all
+          className={`w-full py-2.5 rounded-lg text-[12px] font-semibold flex items-center justify-center gap-2 transition-all
             ${
               isLoading
                 ? "bg-warm-300 text-gray-400 cursor-not-allowed"
-                : "bg-linkedin-500 text-white shadow-md shadow-linkedin-500/25 hover:bg-linkedin-600 active:scale-[0.98]"
+                : "bg-linkedin-500 text-white hover:bg-linkedin-600 active:scale-[0.98]"
             }`}
         >
           {isLoading ? (
             <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Generating…
             </>
           ) : (
             <>
-              <SparklesIcon className="w-4 h-4" />
+              <SparklesIcon className="w-3.5 h-3.5" />
               Generate Cover Letter
             </>
           )}

@@ -9,6 +9,7 @@ function App() {
   const [page, setPage] = useState(PAGES.GENERATOR);
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [resume, setResume] = useState("");
+  const [letterTone, setLetterTone] = useState("professional");
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -16,10 +17,12 @@ function App() {
       try {
         const localResume = await loadData("resume");
         const localGeminiApiKey = await loadData("geminiApiKey");
+        const localLetterTone = await loadData("letterTone");
         const legacyOpenAIKey = await loadData("openAIKey");
 
         setResume(localResume || "");
         setGeminiApiKey(localGeminiApiKey || legacyOpenAIKey || "");
+        setLetterTone(localLetterTone || "professional");
       } catch (error) {
         console.error("Failed to load saved profile data", error);
       } finally {
@@ -48,8 +51,10 @@ function App() {
           setPage={setPage}
           setGeminiApiKey={setGeminiApiKey}
           setResume={setResume}
+          setLetterTone={setLetterTone}
           resume={resume}
           geminiApiKey={geminiApiKey}
+          letterTone={letterTone}
         />
       );
     default:
@@ -58,6 +63,7 @@ function App() {
           setPage={setPage}
           resume={resume}
           geminiApiKey={geminiApiKey}
+          letterTone={letterTone}
         />
       );
   }

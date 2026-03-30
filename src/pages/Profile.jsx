@@ -182,14 +182,17 @@ export default function Profile({
   setPage,
   setGeminiApiKey,
   setResume,
+  setLetterTone,
   resume,
   geminiApiKey,
+  letterTone,
 }) {
   const [isSaving, setIsSaving] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [form, setForm] = useState({
     geminiApiKey: geminiApiKey || "",
     resume: resume || "",
+    letterTone: letterTone || "professional",
   });
 
   const handleChange = (e) => {
@@ -203,6 +206,7 @@ export default function Profile({
 
     const key = form.geminiApiKey.trim();
     const res = form.resume.trim();
+    const tone = form.letterTone;
 
     if (!key) {
       toast.error("API key is required.", TOAST_CONFIG);
@@ -212,8 +216,10 @@ export default function Profile({
     setIsSaving(true);
     try {
       setResume(res);
+      setLetterTone(tone);
       await saveData("resume", res);
       await saveData("geminiApiKey", key);
+      await saveData("letterTone", tone);
       setGeminiApiKey(key);
       toast.success("Settings saved successfully.", TOAST_CONFIG);
     } catch {
@@ -225,7 +231,8 @@ export default function Profile({
 
   const hasChanges =
     form.geminiApiKey !== (geminiApiKey || "") ||
-    form.resume !== (resume || "");
+    form.resume !== (resume || "") ||
+    form.letterTone !== (letterTone || "professional");
   const charCount = form.resume.length;
   const charPct = Math.min((charCount / 5000) * 100, 100);
   const charWarn = charCount > 4500;
@@ -262,7 +269,7 @@ export default function Profile({
 
       {/* ─── Scrollable form ────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
-        <form className="flex flex-col gap-3 p-4" onSubmit={handleSave}>
+        <form className="flex flex-col gap-3 px-4 py-2.5" onSubmit={handleSave}>
           {/* API Key Card */}
           <Card
             icon={<KeyIcon />}
@@ -350,6 +357,56 @@ export default function Profile({
               placeholder="Paste your full resume here — the more detail, the better your cover letters will be."
               className="w-full px-4 py-2.5 bg-warm-50/80 border border-warm-200/80 rounded-lg text-[13px] text-gray-700 placeholder-gray-400 leading-relaxed resize-y focus:outline-none focus:border-linkedin-500 focus:ring-2 focus:ring-linkedin-500/15 transition-all min-h-[140px]"
             />
+          </Card>
+
+          {/* Cover Letter Tone Card */}
+          <Card
+            icon={<FileTextIcon />}
+            title="Letter Tone"
+            subtitle="Choose your cover letter style"
+          >
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {[
+                {
+                  value: "professional",
+                  label: "Professional",
+                  desc: "Formal & structured",
+                },
+                {
+                  value: "enthusiastic",
+                  label: "Enthusiastic",
+                  desc: "Confident & engaging",
+                },
+                {
+                  value: "technical",
+                  label: "Technical Focus",
+                  desc: "Skills & achievements",
+                },
+                {
+                  value: "strategic",
+                  label: "Strategic",
+                  desc: "Impact & leadership",
+                },
+              ].map(({ value, label, desc }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({ ...prev, letterTone: value }))
+                  }
+                  className={`p-2.5 rounded-lg border-2 transition-all text-left ${
+                    form.letterTone === value
+                      ? "border-linkedin-500 bg-linkedin-50"
+                      : "border-warm-200 bg-white hover:border-linkedin-300"
+                  }`}
+                >
+                  <p className="text-[12px] font-semibold text-linkedin-900">
+                    {label}
+                  </p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">{desc}</p>
+                </button>
+              ))}
+            </div>
           </Card>
 
           {/* Privacy note */}
