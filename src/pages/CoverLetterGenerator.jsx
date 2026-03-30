@@ -277,7 +277,16 @@ export default function CoverLetterGenerator({
     if (isLoading) return;
     const key = geminiApiKey?.trim();
     const res = resume?.trim();
-    const jd = jobDescription?.trim();
+    const jdRaw = jobDescription?.trim();
+
+    // Clean LinkedIn noise
+    const jd = jdRaw
+      ?.replace(
+        /Apply|Applied|1 day ago|days ago|people clicked apply|Hybrid|Full-time|Part-time/gi,
+        "",
+      )
+      ?.replace(/\n{2,}/g, "\n") // remove extra line breaks
+      ?.trim();
 
     if (!key) return setErrorMessage("Add your Gemini API key in Settings.");
     if (!res) return setErrorMessage("Add your resume in Settings.");
@@ -289,119 +298,62 @@ export default function CoverLetterGenerator({
     setCopied(false);
 
     try {
-      // Detailed tone instructions
-      const toneInstructions = {
-        professional: {
-          guide: "Formal, business-professional tone. Use structured language.",
-          content:
-            "- Demonstrate alignment with company mission\n" +
-            "- Highlight relevant experience and accomplishments\n" +
-            "- Show understanding of the role's responsibilities\n" +
-            "- Express genuine interest in contributing to the organization",
-        },
-        enthusiastic: {
-          guide:
-            "Energetic, confident, and passionate tone. Show genuine excitement.",
-          content:
-            "- Lead with WHY this role/company excites you specifically\n" +
-            "- Show enthusiasm for the impact you'll make\n" +
-            "- Demonstrate passion for the mission/work\n" +
-            "- End with eagerness to discuss the opportunity",
-        },
-        technical: {
-          guide:
-            "Technical-focused tone. Emphasize tools, technologies, and measurable results.",
-          content:
-            "- List specific technologies/frameworks/tools relevant to the job\n" +
-            "- Highlight concrete achievements with metrics (30% improvement, scaled from X to Y, etc.)\n" +
-            "- Connect technical skills directly to job requirements\n" +
-            "- Mention production experience, system design, or architecture decisions",
-        },
-        strategic: {
-          guide:
-            "Leadership-focused tone. Emphasize strategic thinking and business impact.",
-          content:
-            "- Focus on business outcomes and ROI, not just tasks\n" +
-            "- Highlight leadership, initiative-taking, and strategic decisions\n" +
-            "- Show how you've driven change or improvement\n" +
-            "- Demonstrate understanding of broader company/industry challenges",
-        },
-      };
-
-      // Detailed length specifications
-      const lengthSpecs = {
-        short: {
-          format:
-            "EXACTLY 1-2 SHORT PARAGRAPHS (90-130 words total). Maximum 2 paragraphs.",
-          structure:
-            "Paragraph 1: Opening hook + 1 specific match to job\n" +
-            "Paragraph 2: 1 concrete achievement + brief call-to-action\n" +
-            "NO fluff, NO generic closing",
-          rules:
-            "- Each sentence must add value\n" +
-            "- Use short, punchy sentences (under 15 words)\n" +
-            "- Replace adjectives with metrics/proof\n" +
-            "- NO 'I am excited to' or 'I believe' filler phrases",
-        },
-        medium: {
-          format: "EXACTLY 2-3 PARAGRAPHS (180-240 words total).",
-          structure:
-            "Paragraph 1: Opening hook (why this role/company?)\n" +
-            "Paragraph 2: 2-3 specific achievements aligned to job\n" +
-            "Paragraph 3: Closing statement + ask to discuss",
-          rules:
-            "- Lead with strongest qualification\n" +
-            "- Use concrete examples and numbers\n" +
-            "- Connect each achievement back to job needs\n" +
-            "- Avoid repeated information from resume",
-        },
-        long: {
-          format: "EXACTLY 3-4 PARAGRAPHS (300-380 words total).",
-          structure:
-            "Paragraph 1: Strong opening hook + role context\n" +
-            "Paragraph 2: Deep dive into 1 major achievement/project\n" +
-            "Paragraph 3: 1-2 additional relevant achievements\n" +
-            "Paragraph 4: Closing statement + strong call-to-action",
-          rules:
-            "- Tell a compelling narrative across paragraphs\n" +
-            "- Include project context, challenges, and results\n" +
-            "- Show progression and growth\n" +
-            "- End with enthusiasm and next steps",
-        },
-      };
-
       const selectedTone = letterTone || "professional";
       const selectedLength = letterLength || "medium";
-      const toneInfo =
-        toneInstructions[selectedTone] || toneInstructions.professional;
-      const lengthInfo = lengthSpecs[selectedLength] || lengthSpecs.medium;
 
-      const prompt =
-        `You are an expert cover letter writer. Your task is to write a cover letter with these EXACT specifications:\n\n` +
-        `=== TONE STYLE ===\n` +
-        `${toneInfo.guide}\n\n` +
-        `What to include (${selectedTone}):\n` +
-        `${toneInfo.content}\n\n` +
-        `=== LENGTH & FORMAT ===\n` +
-        `${lengthInfo.format}\n\n` +
-        `Structure:\n` +
-        `${lengthInfo.structure}\n\n` +
-        `Rules to follow:\n` +
-        `${lengthInfo.rules}\n\n` +
-        `=== CONTENT RULES ===\n` +
-        `- Write the cover letter ONLY (no subject line, salutation, signature, or closing)\n` +
-        `- Make it immediately ready to use - no "Dear Hiring Manager" or "Sincerely"\n` +
-        `- Use SPECIFIC details from the resume and job description\n` +
-        `- Avoid generic phrases - every sentence must be specific to THIS candidate and THIS job\n` +
-        `- If metrics exist, USE THEM. e.g., "increased X by 40%" not "improved X"\n` +
-        `- Match language from the job description when relevant\n\n` +
-        `=== INPUT DATA ===\n` +
-        `RESUME:\n${res}\n\n` +
-        `JOB DESCRIPTION:\n${jd}\n\n` +
-        `=== FINAL CHECK ===\n` +
-        `Word count should be ${selectedLength === "short" ? "90-130" : selectedLength === "medium" ? "180-240" : "300-380"} words.\n` +
-        `Paragraph count should be ${selectedLength === "short" ? "1-2" : selectedLength === "medium" ? "2-3" : "3-4"}.\n\n` +
-        `Write the cover letter now:`;
+      // Compact tone & length configs
+      const toneGuides = {
+        professional:
+          "Professional tone: Show alignment with company & relevant achievements",
+        enthusiastic:
+          "Enthusiastic tone: Lead with passion for the role. Show genuine excitement",
+        technical:
+          "Technical tone: Highlight tools, metrics, & technical accomplishments",
+        strategic:
+          "Strategic tone: Focus on business impact & leadership decisions",
+      };
+
+      const lengthConfigs = {
+        short: { words: "90-130", paras: "1-2" },
+        medium: { words: "180-240", paras: "2-3" },
+        long: { words: "300-380", paras: "3-4" },
+      };
+
+      const toneGuidance = toneGuides[selectedTone] || toneGuides.professional;
+      const { words, paras } =
+        lengthConfigs[selectedLength] || lengthConfigs.medium;
+
+      const prompt = `Write a highly personalized, human-sounding cover letter tailored to THIS candidate and THIS job.
+
+      Extract relevant experience from the profile. Ignore LinkedIn UI noise. Identify 2–3 key job requirements and match them directly.
+
+      Tone: ${toneGuidance}
+
+      Format: ${words} words, ${paras} paragraphs (NO greeting or closing)
+
+      Rules:
+      - Start with strongest, most relevant achievement
+      - Focus on RESULTS (metrics, scale, impact), not responsibilities
+      - Mention specific tools/technologies and WHY they were used
+      - Align experience with company mission or domain
+      - Show clear value for this role
+
+      Avoid:
+      - "I am excited to apply", "I believe I am a good fit"
+      - Generic or reusable statements
+      - Repeating resume without adding insight
+
+      Write naturally, confidently, like a real engineer.
+
+      PROFILE:
+      ${res}
+
+      JOB:
+      ${jd}
+
+      If the output feels generic or could apply to any company, rewrite it.
+
+      Generate now:`;
 
       setCoverLetter(await postGeminiMessage(prompt, key));
     } catch (err) {
